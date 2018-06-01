@@ -52,7 +52,7 @@ class GraphCNNExperiment(object):
             
     # Will retrieve the value stored as the maximum test accuracy on a trained network
     # SHOULD ONLY BE USED IF test_batch_size == ALL TEST SAMPLES
-    def get_max_accuracy(self):
+    def get_max_accuracy(self):    # Only works with debug set to False
         tf.reset_default_graph()
         with tf.variable_scope('loss') as scope:
             max_acc_test = tf.Variable(tf.zeros([]), name="max_acc_test")
@@ -217,7 +217,7 @@ class GraphCNNExperiment(object):
 
             correct_prediction = tf.cast(tf.equal(tf.argmax(self.net.current_V, 1), self.net.labels), tf.float32)
             accuracy = tf.reduce_mean(correct_prediction)
-            
+                       
             # we have 2 variables that will keep track of the best accuracy obtained in training/testing batch
             # SHOULD ONLY BE USED IF test_batch_size == ALL TEST SAMPLES
             self.max_acc_train = tf.Variable(tf.zeros([]), name="max_acc_train")
@@ -346,7 +346,7 @@ class GraphCNNExperiment(object):
                                 test_writer.add_summary(summary, i)
                             
                         start_temp = time.time()
-                        summary, _, reports = sess.run([summary_merged, train_step, self.reports], feed_dict={self.net.is_training:1})
+                        summary, _, reports, pred = sess.run([summary_merged, train_step, self.reports, self.y_pred_cls], feed_dict={self.net.is_training:1})
                         total_training += time.time() - start_temp
                         i += 1
                         if ((i-1) % self.display_iter) == 0:
@@ -380,7 +380,9 @@ class GraphCNNExperiment(object):
                     if wasKeyboardInterrupt:
                         raise raisedEx
                 
-                return sess.run([self.max_acc_test, self.net.global_step])
+                
+                return sess.run([self.max_acc_test, self.net.global_step, self.y_pred_cls], feed_dict={self.net.is_training:0})
+#                return sess.run([self.max_acc_test, self.net.global_step])
         else:
             self.print_ext('Model "%s" already trained!' % self.model_name)
             return self.get_max_accuracy()
@@ -467,3 +469,8 @@ class SingleGraphCNNExperiment(GraphCNNExperiment):
             self.reports['accuracy'] = accuracy
             self.reports['max acc.'] = max_acc
             self.reports['cross_entropy'] = cross_entropy
+            
+            #### Added to compute prediction
+#            y_pred = tf.nn.softmax(self.net.current_V)
+            self.y_pred_cls = tf.argmax(self.net.current_V, 2)
+            ####

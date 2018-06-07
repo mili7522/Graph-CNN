@@ -3,7 +3,7 @@ import pandas as pd
 data = pd.read_csv('2018-06-01-NSW-SA1Input.csv', index_col = 0)
 
 # Filter just those SA1s in the giant component
-SA1s = pd.read_csv('Geography/2018-06-01-NSW-SA1s.csv', squeeze = True)
+SA1s = pd.read_csv('Geography/2018-06-01-NSW-SA1s.csv', squeeze = True, header = None)
 
 data = data.loc[SA1s]
 
@@ -21,7 +21,7 @@ data_normalised.to_csv('2018-06-01-NSW-SA1Input-Normalised.csv')
 data = pd.read_csv('2018-06-07-VIC-SA1Input.csv', index_col = 0)
 
 # Filter just those SA1s in the giant component
-SA1s = pd.read_csv('Geography/2018-06-07-VIC-SA1s.csv', squeeze = True)
+SA1s = pd.read_csv('Geography/2018-06-07-VIC-SA1s.csv', squeeze = True, header = None)
 
 data = data.loc[SA1s]
 

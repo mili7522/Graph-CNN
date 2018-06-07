@@ -28,3 +28,16 @@ for edge in links.itertuples():
 links['Distance'] = distances
 
 links.to_csv('2018-06-01-NSW-NeighbourDriveTimesAndDistance.csv')
+
+
+### VIC
+links = pd.read_csv('2018-06-07-VIC-NeighbourDriveTimes.csv')
+centres = pd.read_csv('Geography/2018-06-07-VIC-SA1-2016Centres.csv', index_col = 0)
+
+distances = []
+for edge in links.itertuples():
+    distances.append(distanceBetweenCm(centres.loc[edge[1]], centres.loc[edge[2]]))
+
+links['Distance'] = distances
+
+links.to_csv('2018-06-07-VIC-NeighbourDriveTimesAndDistance.csv')

@@ -381,8 +381,8 @@ class GraphCNNExperiment(object):
                         raise raisedEx
                 
                 
-                return sess.run([self.max_acc_test, self.net.global_step, self.y_pred_cls], feed_dict={self.net.is_training:0})
-#                return sess.run([self.max_acc_test, self.net.global_step])
+#                return sess.run([self.max_acc_test, self.net.global_step, self.y_pred_cls], feed_dict={self.net.is_training:0})
+                return sess.run([self.max_acc_test, self.net.global_step])
         else:
             self.print_ext('Model "%s" already trained!' % self.model_name)
             return self.get_max_accuracy()

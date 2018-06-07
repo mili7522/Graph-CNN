@@ -29,21 +29,15 @@ def load_sa1_dataset():
     features = np.array(features).reshape((len(keys), -1))
     
     with open('Data/2018-06-03-SYD-NeighbourLinkFeatures.csv', 'r') as file:
-        adj_mat = np.zeros((len(labels), 4, len(labels)))
+        adj_mat = np.zeros((len(labels), 1, len(labels)))
         for i, line in enumerate(file):
             if i == 0:  # Skip first line (header)
                 continue
             s = line[:-1].split(',')
             a = keys.index(s[0])
             b = keys.index(s[1])
-            adj_mat[a, 0, b] = float(s[-1]);  # Inverse of distance
-            adj_mat[b, 0, a] = float(s[-1]);
-            adj_mat[a, 1, b] = float(s[-2]);  # Inverse of distance
-            adj_mat[b, 1, a] = float(s[-2]);
-            adj_mat[a, 2, b] = float(s[-3]);  # Inverse of distance
-            adj_mat[b, 2, a] = float(s[-3]);
-            adj_mat[a, 3, b] = 1;
-            adj_mat[b, 3, a] = 1;
+            adj_mat[a, 0, b] = 1;
+            adj_mat[b, 0, a] = 1;
     with open('Data/2018-06-07-MEL-NeighbourLinkFeatures.csv', 'r') as file:
         for i, line in enumerate(file):
             if i == 0:  # Skip first line (header)
@@ -51,14 +45,8 @@ def load_sa1_dataset():
             s = line[:-1].split(',')
             a = keys.index(s[0])
             b = keys.index(s[1])
-            adj_mat[a, 0, b] = float(s[-1]);  # Inverse of distance
-            adj_mat[b, 0, a] = float(s[-1]);
-            adj_mat[a, 1, b] = float(s[-2]);  # Inverse of distance
-            adj_mat[b, 1, a] = float(s[-2]);
-            adj_mat[a, 2, b] = float(s[-3]);  # Inverse of distance
-            adj_mat[b, 2, a] = float(s[-3]);
-            adj_mat[a, 3, b] = 1;
-            adj_mat[b, 3, a] = 1;
+            adj_mat[a, 0, b] = 1;
+            adj_mat[b, 0, a] = 1;
     return (features, adj_mat, labels), lengths
 
 dataset, lengths = load_sa1_dataset()
@@ -106,7 +94,7 @@ layers = []
 neurons = []
 rep = []
 
-    
+
 
 exp = SingleGraphCNNExperiment('2018-06-07-SydneyToMel', '2018-06-07-SydneyToMel', SA1Experiment(neurons = n, blocks = l))
 

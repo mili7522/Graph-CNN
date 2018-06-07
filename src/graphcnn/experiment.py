@@ -308,81 +308,83 @@ class GraphCNNExperiment(object):
                     self.reports['lr'] = self.learning_rate
                     tf.summary.scalar('learning_rate', self.learning_rate)
             
-            with tf.Session() as sess:
-                sess.run(tf.global_variables_initializer())
-                sess.run(tf.local_variables_initializer(), self.variable_initialization)
-                
-                if self.debug == False:
-                    saver = tf.train.Saver()
-                    self.load_model(sess, saver)
-                                
-                    self.print_ext('Starting summaries')
-                    test_writer = tf.summary.FileWriter(self.test_summary_path, sess.graph)
-                    train_writer = tf.summary.FileWriter(self.train_summary_path, sess.graph)
+#            with tf.Session() as sess:
+            sess = tf.Session()
+            sess.run(tf.global_variables_initializer())
+            sess.run(tf.local_variables_initializer(), self.variable_initialization)
             
-                summary_merged = tf.summary.merge_all()
-            
-                self.print_ext('Starting threads')
-                coord = tf.train.Coordinator()
-                threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-                self.print_ext('Starting training. train_batch_size:', self.train_batch_size, 'test_batch_size:', self.test_batch_size)
-                wasKeyboardInterrupt = False
-                try:
-                    total_training = 0.0
-                    total_testing = 0.0
-                    start_at = time.time()
-                    last_summary = time.time()
-                    while i < self.num_iterations:
-                        if i % self.snapshot_iter == 0 and self.debug == False:
-                            self.save_model(sess, saver, i)
-                        if i % self.iterations_per_test == 0:
-                            start_temp = time.time()
-                            summary, reports = sess.run([summary_merged, self.reports], feed_dict={self.net.is_training:0})
-                            total_testing += time.time() - start_temp
-                            self.print_ext('Test Step %d Finished' % i)
-                            for key, value in reports.items():
-                                self.print_ext('Test Step %d "%s" = ' % (i, key), value)
-                            if self.debug == False:
-                                test_writer.add_summary(summary, i)
+            if self.debug == False:
+                saver = tf.train.Saver()
+                self.load_model(sess, saver)
                             
-                        start_temp = time.time()
-                        summary, _, reports, pred = sess.run([summary_merged, train_step, self.reports, self.y_pred_cls], feed_dict={self.net.is_training:1})
-                        total_training += time.time() - start_temp
-                        i += 1
-                        if ((i-1) % self.display_iter) == 0:
-                            if self.debug == False:
-                                train_writer.add_summary(summary, i-1)
-                            total = time.time() - start_at
-                            self.print_ext('Training Step %d Finished Timing (Training: %g, Test: %g) after %g seconds' % (i-1, total_training/total, total_testing/total, time.time()-last_summary)) 
-                            for key, value in reports.items():
-                                self.print_ext('Training Step %d "%s" = ' % (i-1, key), value)
-                            last_summary = time.time()            
-                        if (i-1) % 100 == 0:
-                            total_training = 0.0
-                            total_testing = 0.0
-                            start_at = time.time()
+                self.print_ext('Starting summaries')
+                test_writer = tf.summary.FileWriter(self.test_summary_path, sess.graph)
+                train_writer = tf.summary.FileWriter(self.train_summary_path, sess.graph)
+        
+            summary_merged = tf.summary.merge_all()
+        
+            self.print_ext('Starting threads')
+            coord = tf.train.Coordinator()
+            threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+            self.print_ext('Starting training. train_batch_size:', self.train_batch_size, 'test_batch_size:', self.test_batch_size)
+            wasKeyboardInterrupt = False
+            try:
+                total_training = 0.0
+                total_testing = 0.0
+                start_at = time.time()
+                last_summary = time.time()
+                while i < self.num_iterations:
+                    if i % self.snapshot_iter == 0 and self.debug == False:
+                        self.save_model(sess, saver, i)
                     if i % self.iterations_per_test == 0:
-                        summary = sess.run(summary_merged, feed_dict={self.net.is_training:0})
+                        start_temp = time.time()
+                        summary, reports = sess.run([summary_merged, self.reports], feed_dict={self.net.is_training:0})
+                        total_testing += time.time() - start_temp
+                        self.print_ext('Test Step %d Finished' % i)
+                        for key, value in reports.items():
+                            self.print_ext('Test Step %d "%s" = ' % (i, key), value)
                         if self.debug == False:
                             test_writer.add_summary(summary, i)
-                        self.print_ext('Test Step %d Finished' % i)
-                except KeyboardInterrupt as err:
-                    self.print_ext('Training interrupted at %d' % i)
-                    wasKeyboardInterrupt = True
-                    raisedEx = err
-                finally:
-                    if i > 0 and self.debug == False:
-                        self.save_model(sess, saver, i)
-                    self.print_ext('Training completed, starting cleanup!')
-                    coord.request_stop()
-                    coord.join(threads)
-                    self.print_ext('Cleanup completed!')
-                    if wasKeyboardInterrupt:
-                        raise raisedEx
+                        
+                    start_temp = time.time()
+                    summary, _, reports, pred = sess.run([summary_merged, train_step, self.reports, self.y_pred_cls], feed_dict={self.net.is_training:1})
+                    total_training += time.time() - start_temp
+                    i += 1
+                    if ((i-1) % self.display_iter) == 0:
+                        if self.debug == False:
+                            train_writer.add_summary(summary, i-1)
+                        total = time.time() - start_at
+                        self.print_ext('Training Step %d Finished Timing (Training: %g, Test: %g) after %g seconds' % (i-1, total_training/total, total_testing/total, time.time()-last_summary)) 
+                        for key, value in reports.items():
+                            self.print_ext('Training Step %d "%s" = ' % (i-1, key), value)
+                        last_summary = time.time()            
+                    if (i-1) % 100 == 0:
+                        total_training = 0.0
+                        total_testing = 0.0
+                        start_at = time.time()
+                if i % self.iterations_per_test == 0:
+                    summary = sess.run(summary_merged, feed_dict={self.net.is_training:0})
+                    if self.debug == False:
+                        test_writer.add_summary(summary, i)
+                    self.print_ext('Test Step %d Finished' % i)
+            except KeyboardInterrupt as err:
+                self.print_ext('Training interrupted at %d' % i)
+                wasKeyboardInterrupt = True
+                raisedEx = err
+            finally:
+                if i > 0 and self.debug == False:
+                    self.save_model(sess, saver, i)
+                self.print_ext('Training completed, starting cleanup!')
+                coord.request_stop()
+                coord.join(threads)
+                self.print_ext('Cleanup completed!')
+                if wasKeyboardInterrupt:
+                    raise raisedEx
                 
                 
-                return sess.run([self.max_acc_test, self.net.global_step, self.y_pred_cls], feed_dict={self.net.is_training:0})
-#                return sess.run([self.max_acc_test, self.net.global_step])
+#                return sess.run([self.max_acc_test, self.net.global_step, self.y_pred_cls], feed_dict={self.net.is_training:0})
+                return sess.run([self.max_acc_test, self.net.global_step])
+#                return sess
         else:
             self.print_ext('Model "%s" already trained!' % self.model_name)
             return self.get_max_accuracy()
@@ -417,6 +419,7 @@ class SingleGraphCNNExperiment(GraphCNNExperiment):
             beta = make_bias_variable('bias', input_size)
             self.current_V = tf.nn.batch_normalization(self.current_V, batch_mean, batch_var, beta, gamma, 1e-3)
             return self.current_V
+    
     def create_data(self):
         with tf.device("/cpu:0"):
             with tf.variable_scope('input') as scope:

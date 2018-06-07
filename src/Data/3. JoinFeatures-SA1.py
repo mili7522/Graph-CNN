@@ -35,7 +35,7 @@ vicSA1s = vicSA1s.loc[vic_AEC.index]
 nswSA1s = nswSA1s.loc[nsw_AEC.index]
 
 
-vicSA1s['Category'] = np.floor(vic_AEC['vote_pc'] * 10).astype(int)
+vicSA1s['Category'] = (vic_AEC['vote_pc'] // 10).astype(int)
 nswSA1s['Category'] = np.floor(nsw_AEC['vote_pc'] * 10).astype(int)
 vicSA1s.to_csv('2018-06-07-VIC-SA1Input.csv', index = True)
 nswSA1s.to_csv('2018-06-01-NSW-SA1Input.csv', index = True)

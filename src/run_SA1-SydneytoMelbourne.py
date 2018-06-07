@@ -28,8 +28,8 @@ def load_sa1_dataset():
     labels = np.array(labels)
     features = np.array(features).reshape((len(keys), -1))
     
+    adj_mat = np.zeros((len(labels), 1, len(labels)))
     with open('Data/2018-06-03-SYD-NeighbourLinkFeatures.csv', 'r') as file:
-        adj_mat = np.zeros((len(labels), 1, len(labels)))
         for i, line in enumerate(file):
             if i == 0:  # Skip first line (header)
                 continue
@@ -83,7 +83,7 @@ class SA1Experiment():
 
 l = 2
 n = 128
-i = 1
+i = 0
 
 
 saveName = '../../../Output/2018-06-08-SydneyToMelbourne.csv'
@@ -101,12 +101,13 @@ exp = SingleGraphCNNExperiment('2018-06-07-SydneyToMel', '2018-06-07-SydneyToMel
 exp.num_iterations = 1000
 exp.optimizer = 'adam'
 
-exp.debug = False  # Was True
+exp.debug = True  # Was True
 
 exp.preprocess_data(dataset)
 
-exp.train_idx = list(range(lengths[0]))
-exp.test_idx = list(range(lengths[0], lengths[0] + lengths[1]))
+exp.train_idx = np.arange(lengths[0])
+exp.test_idx = np.arange(lengths[0], lengths[0] + lengths[1])
+
 results = exp.run()
 
 max_acc.append(results[0])

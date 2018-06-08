@@ -1,6 +1,9 @@
 from graphcnn.experiment import *
 import sys
 import pandas as pd
+import time
+
+startTime = time.time()
 
 def load_sa1_dataset():
     keys = []
@@ -18,21 +21,17 @@ def load_sa1_dataset():
         features = np.array(features).reshape((len(keys), -1))
     
     with open('Data/2018-06-01-NSW-NeighbourLinkFeatures.csv', 'r') as file:
-        adj_mat = np.zeros((len(labels), 4, len(labels)))
+        adj_mat = np.zeros((len(labels), 2, len(labels)))
         for i, line in enumerate(file):
             if i == 0:  # Skip first line (header)
                 continue
             s = line[:-1].split(',')
             a = keys.index(s[0])
             b = keys.index(s[1])
-            adj_mat[a, 0, b] = float(s[-1]);  # Inverse of distance
-            adj_mat[b, 0, a] = float(s[-1]);
-            adj_mat[a, 1, b] = float(s[-2]);  # Inverse of distance
-            adj_mat[b, 1, a] = float(s[-2]);
-            adj_mat[a, 2, b] = float(s[-3]);  # Inverse of distance
-            adj_mat[b, 2, a] = float(s[-3]);
-            adj_mat[a, 3, b] = 1;
-            adj_mat[b, 3, a] = 1;
+            adj_mat[a, 0, b] = float(s[-2]);  # Inverse of drive time
+            adj_mat[b, 0, a] = float(s[-2]);
+            adj_mat[a, 1, b] = 1;
+            adj_mat[b, 1, a] = 1;
     return features, adj_mat, labels
 
 dataset = load_sa1_dataset()
@@ -68,7 +67,7 @@ except IndexError:
     n = 128
     i = 0
 
-saveName = 'Output/SemiSupervisedNSW-Boundary-l={:d}-n={:d}-i={:d}.csv'.format(l,n,i)
+saveName = 'Output/5FoldNSW-DriveTime-l={:d}-n={:d}-i={:d}.csv'.format(l,n,i)
 
 max_acc = []
 iteration = []
@@ -80,15 +79,15 @@ rep = []
 
 exp = SingleGraphCNNExperiment('2018-06-06-SA1', '2018-06-06-sa1', SA1Experiment(neurons = n, blocks = l))
 
-exp.num_iterations = 2000
+exp.num_iterations = 1000
 exp.optimizer = 'adam'
 
 exp.debug = True  # Was True
 
 exp.preprocess_data(dataset)
 
-#exp.train_idx, exp.test_idx = list(inst.split(np.arange(len(dataset[-1]))))[i]
-exp.test_idx, exp.train_idx = list(inst.split(np.arange(len(dataset[-1]))))[i]  # Reversed to get more samples in the test set than the training set
+exp.train_idx, exp.test_idx = list(inst.split(np.arange(len(dataset[-1]))))[i]
+#exp.test_idx, exp.train_idx = list(inst.split(np.arange(len(dataset[-1]))))[i]  # Reversed to get more samples in the test set than the training set
 results = exp.run()
 
 max_acc.append(results[0])
@@ -105,3 +104,6 @@ n_df = pd.DataFrame(neurons, columns = ['Neurons'])
 
 df = pd.concat([n_df, l_df, rep_df, max_acc_df, iteration_df], axis = 1)
 df.to_csv(saveName)
+
+endTime = time.time()
+print('Time:', (endTime - startTime)/60)

@@ -1,4 +1,14 @@
 # Graph-CNN
+
+## Note for COMP5329 Assignment 2
+All code to preprocess data is present in the 'Data' folder. The GIS shapefiles need to be downloaded from the ABS (http://www.abs.gov.au/AUSSTATS/abs@.nsf/DetailsPage/1270.0.55.001July%202016?OpenDocument).
+The files 'Statistical Area Level 1 (SA1) ASGS Ed 2016 Digital Boundaries in ESRI Shapefile Format' was used, containing all SA1 regions of Australia.
+
+All test can be run from the command line by specifying the number of layer groups (consisting of an embedding layer and graph convolution layer), number of neurons per layer and the repetition number (0 to 4 for 5 fold repetition).
+Default values of 2, 64 and 0 are used if not enough parameters are specified.
+Required inputs are already present in the 'Data' folder.
+
+-------
 Implementation of "Robust Spatial Filtering with Graph Convolutional Neural Networks" - https://arxiv.org/abs/1703.00792.
 This project is still under development. Email Felipe at fps7806@rit.edu if you have any suggestions or problems.
 ## Requirements:

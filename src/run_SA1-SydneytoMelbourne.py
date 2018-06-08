@@ -70,26 +70,22 @@ class SA1Experiment():
         net.make_graphcnn_layer(10, name='final', with_bn=False, with_act_func = False)
 
 
-#no_folds = 5
-#inst = KFold(n_splits = no_folds, shuffle=True, random_state=125)
-
-#ls = [1, 2, 3]
-#ns = [64, 128]
-#r = int(sys.argv[1])
-#i = r // 6  # Repetition
-#j = r % 6  # Parameters
-#l = ls[j // len(ns)]
-#n = ns[j % len(ns)]
-
-l = 2
-n = 128
-i = 0
 
 
-saveName = '../../../Output/2018-06-08-SydneyToMelbourne.csv'
+try:
+    l = int(sys.argv[1])
+    n = int(sys.argv[2])
+    i = int(sys.argv[3])
+except IndexError:
+    l = 2
+    n = 128
+    i = 0
+
+
+saveName = 'Output/SydneyToMelbourne-l={:d}-n={:d}-i={:d}.csv'.format(l,n,i)
 
 max_acc = []
-max_acc_iteration = []
+iteration = []
 layers = []
 neurons = []
 rep = []
@@ -111,16 +107,16 @@ exp.test_idx = np.arange(lengths[0], lengths[0] + lengths[1])
 results = exp.run()
 
 max_acc.append(results[0])
-max_acc_iteration.append(results[1])
+iteration.append(results[1])
 layers.append(l)
 neurons.append(n)
 rep.append(i)
 
 max_acc_df = pd.DataFrame(max_acc, columns = ['Max Val Acc'])
-max_acc_iteration_df = pd.DataFrame(max_acc_iteration, columns = ['Max Val Acc Iteration'])
+iteration_df = pd.DataFrame(iteration, columns = ['Iteration'])
 rep_df = pd.DataFrame(rep, columns = ['Repeat'])
 l_df = pd.DataFrame(layers, columns = ['Layers'])
 n_df = pd.DataFrame(neurons, columns = ['Neurons'])
 
-df = pd.concat([n_df, l_df, rep_df, max_acc_df, max_acc_iteration_df], axis = 1)
+df = pd.concat([n_df, l_df, rep_df, max_acc_df, iteration_df], axis = 1)
 df.to_csv(saveName)

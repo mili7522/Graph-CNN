@@ -99,7 +99,7 @@ origins = centres.loc[links['src_SA1_7DIG16']][['1', '0']].values
 destinations = centres.loc[links['nbr_SA1_7DIG16']][['1', '0']].values
 
 
-file_location = '2018-06-07-NeighbourDriveTimes.csv'
+file_location = '2018-06-07-VIC-NeighbourDriveTimes.csv'
     
 
 startTime = time.time()

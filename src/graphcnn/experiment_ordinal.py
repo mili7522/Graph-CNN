@@ -381,7 +381,7 @@ class GraphCNNExperiment(object):
                         raise raisedEx
                 
                 
-#                return sess.run([self.max_acc_test, self.net.global_step, self.y_pred_cls], feed_dict={self.net.is_training:0})
+                # return sess.run([self.max_acc_test, self.net.global_step, self.y_pred_cls], feed_dict={self.net.is_training:0})
                 return sess.run([self.max_acc_test, self.net.global_step])
         else:
             self.print_ext('Model "%s" already trained!' % self.model_name)
@@ -472,6 +472,6 @@ class SingleGraphCNNExperiment(GraphCNNExperiment):
             self.reports['cross_entropy'] = cross_entropy
             
             #### Added to compute prediction
-#            y_pred = tf.nn.softmax(self.net.current_V)
+            # y_pred = tf.nn.softmax(self.net.current_V)
             self.y_pred_cls = tf.argmax(self.net.current_V, 2)
             ####

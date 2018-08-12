@@ -425,12 +425,19 @@ class SingleGraphCNNExperiment(GraphCNNExperiment):
             with tf.variable_scope('input') as scope:
                 self.print_ext('Creating training Tensorflow Tensors')
                 
-                vertices = self.graph_vertices[:, self.train_idx, :]
-                adjacency = self.graph_adjacency[:, self.train_idx, :, :]
-                adjacency = adjacency[:, :, :, self.train_idx]
-                labels = self.graph_labels[:, self.train_idx]
-                input_mask = np.ones([1, len(self.train_idx), 1]).astype(np.float32)
+                # vertices = self.graph_vertices[:, self.train_idx, :]
+                # adjacency = self.graph_adjacency[:, self.train_idx, :, :]
+                # adjacency = adjacency[:, :, :, self.train_idx]
+                # labels = self.graph_labels[:, self.train_idx]
+                # input_mask = np.ones([1, len(self.train_idx), 1]).astype(np.float32)
                 
+                vertices = self.graph_vertices
+                adjacency = self.graph_adjacency
+                labels = self.graph_labels
+
+                input_mask = np.zeros([1, self.largest_graph, 1]).astype(np.float32)
+                input_mask[:, self.train_idx, :] = 1
+
                 train_input = [vertices, adjacency, labels, input_mask]
                 train_input = self.create_input_variable(train_input)
                 
@@ -449,6 +456,9 @@ class SingleGraphCNNExperiment(GraphCNNExperiment):
         self.print_ext('Creating loss function and summaries')
         
         with tf.variable_scope('loss') as scope:
+            # self.net.current_V = tf.Print(self.net.current_V, [tf.reduce_mean(self.net.current_mask)])
+            # self.net.current_V = tf.stop_gradient(tf.abs(self.net.current_mask-1) * self.net.current_V) + self.net.current_mask * self.net.current_V
+
             inv_sum = (1./tf.reduce_sum(self.net.current_mask))
             cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.net.current_V, labels=self.net.labels)
             cross_entropy = tf.multiply(tf.squeeze(self.net.current_mask), tf.squeeze(cross_entropy))
